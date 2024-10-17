@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mock Cookie Consent Test</title>
+    <style>
+      #cookie-consent-banner {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        background-color: #333;
+        color: #fff;
+        padding: 10px;
+        text-align: center;
+        z-index: 1000;
+      }
+      #cookie-consent-banner button {
+        margin: 5px;
+        padding: 5px 10px;
+      }
+      .iframe-placeholder {
+        background-color: #ccc;
+        display: inline-block;
+        height: 300px;
+        position: relative;
+        width: 600px;
+      }
+      .iframe-placeholder div {
+        background-color: #848484;
+        border-radius: 15px;
+        height: 50%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 50%;
+      }
+      .iframe-placeholder p {
+        color: #fff;
+        font-size: 7.5em;
+        margin: 0;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Iframe and Placeholder -->
+    <div class="framer-1sa4x81-container">
+      <!-- Placeholder will be shown when cookies are rejected -->
+      <div class="iframe-placeholder" id="iframe-placeholder">
+        <div>
+          <p>&ctdot;</p>
+        </div>
+        <p>Please accept marketing cookies to view this YouTube content.</p>
+      </div>
+
+      <!-- YouTube iframe -->
+      <iframe
+        id="youtube-iframe"
+        src="https://www.youtube.com/embed/lO8KcaZyopk"
+        width="600"
+        height="300"
+        frameborder="0"
+        allowfullscreen
+        style="display: none"
+        <!--
+        Initially
+        hidden
+        --
+      >
+        ></iframe
+      >
+    </div>
+
+    <!-- Mock Cookie Consent Banner -->
+    <div id="cookie-consent-banner" style="display: none">
+      This site uses cookies to show embedded content (YouTube). Please accept
+      cookies to continue.
+      <button id="accept-cookies">Accept Cookies</button>
+      <button id="reject-cookies">Reject Cookies</button>
+    </div>
+
+    <!-- Mock Cookie Consent System -->
+    <script type="text/javascript">
+      // Constants for cookie consent storage keys
+      const COOKIE_CONSENT_KEY = "cookieConsent";
+      const CONSENT_ACCEPTED = "accepted";
+      const CONSENT_REJECTED = "rejected";
+
+      // Mock Cookiebot object for local testing
+      window.Cookiebot = {
+        consents: {
+          marketing: false, // Initial state (no consent)
+        },
+        renew: function () {
+          // Simulate the consent banner reappearing
+          document.getElementById("cookie-consent-banner").style.display =
+            "block";
+        },
+      };
+
+      // Function to show the iframe and hide the placeholder
+      const showIframe = () => {
+        document.getElementById("youtube-iframe").style.display = "block";
+        document.getElementById("iframe-placeholder").style.display = "none";
+      };
+
+      // Function to show the placeholder and hide the iframe
+      const showPlaceholder = () => {
+        document.getElementById("youtube-iframe").style.display = "none";
+        document.getElementById("iframe-placeholder").style.display = "block";
+      };
+
+      // Function to handle consent logic based on stored value
+      const handleConsent = () => {
+        const consent = localStorage.getItem(COOKIE_CONSENT_KEY);
+
+        if (consent === CONSENT_ACCEPTED) {
+          Cookiebot.consents.marketing = true; // Cookies accepted
+          showIframe();
+        } else if (consent === CONSENT_REJECTED) {
+          Cookiebot.consents.marketing = false; // Cookies rejected
+          showPlaceholder(); // Show placeholder again if rejected
+          Cookiebot.renew(); // Show banner again to reconsider consent
+        } else {
+          // No consent stored, show the consent banner
+          Cookiebot.renew();
+          showPlaceholder();
+        }
+      };
+
+      // On page load, check if consent has already been given
+      window.addEventListener("load", () => {
+        handleConsent(); // Handle consent on load
+      });
+
+      // Handle accept button click
+      document
+        .getElementById("accept-cookies")
+        .addEventListener("click", () => {
+          Cookiebot.consents.marketing = true; // Simulate cookie acceptance
+          localStorage.setItem(COOKIE_CONSENT_KEY, CONSENT_ACCEPTED); // Store consent in localStorage
+          document.getElementById("cookie-consent-banner").style.display =
+            "none"; // Hide banner
+          showIframe(); // Show iframe and remove placeholder
+        });
+
+      // Handle reject button click
+      document
+        .getElementById("reject-cookies")
+        .addEventListener("click", () => {
+          Cookiebot.consents.marketing = false; // Simulate cookie rejection
+          localStorage.setItem(COOKIE_CONSENT_KEY, CONSENT_REJECTED); // Store rejection in localStorage
+          document.getElementById("cookie-consent-banner").style.display =
+            "none"; // Hide banner
+          showPlaceholder(); // Keep the placeholder and hide the iframe
+        });
+    </script>
+  </body>
+</html>
